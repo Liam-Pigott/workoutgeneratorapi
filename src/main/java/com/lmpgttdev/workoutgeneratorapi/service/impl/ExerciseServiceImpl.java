@@ -18,11 +18,12 @@ public class ExerciseServiceImpl implements ExerciseService {
     private ExerciseRepository exerciseRepository;
 
     @Override
-    public void createExercise(Exercise exercise) {
+    public Exercise createExercise(Exercise exercise) {
         String name = exercise.getName();
-        Exercise existingExercise = exerciseRepository.findExerciseByName(name).orElse(null);
-        if(existingExercise == null){
-            exerciseRepository.save(exercise);
+        boolean exerciseExists = exerciseRepository.findByNameIgnoreCase(name).isPresent();
+        if(!exerciseExists){
+            exerciseRepository.saveAndFlush(exercise);
+            return exercise;
         }
         else{
             throw new IllegalStateException("Exercise with name: " + name + " already exists");
@@ -46,16 +47,25 @@ public class ExerciseServiceImpl implements ExerciseService {
 
     @Override
     public Optional<Exercise> getExerciseByName(String name) {
-        return exerciseRepository.findExerciseByName(name);
+        return exerciseRepository.findByNameIgnoreCase(name);
     }
 
     @Override
-    public void updateExercise(Long id, Exercise exercise) {
-
+    public Exercise updateExercise(Long id, Exercise exercise) {
+        boolean exerciseNameExists = exerciseRepository.findByNameIgnoreCase(exercise.getName()).isPresent();
+        if(exerciseNameExists){
+            throw new IllegalStateException("Could not update. Exercise with name: " + exercise.getName() + " already exists.");
+        }
+        Optional<Exercise> existingExerciseOptional = exerciseRepository.findById(id);
+        if(existingExerciseOptional.isEmpty()){
+            throw new IllegalStateException("Could not find exercise with id: " + id);
+        }
+        exercise.setId(id);
+        return exerciseRepository.save(exercise);
     }
 
     @Override
     public void deleteExercise(Long id) {
-        exerciseRepository.deleteById(id); //return value
+        exerciseRepository.deleteById(id);
     }
 }

@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface ExerciseService {
 
     //Create
-    void createExercise(Exercise exercise);
+    Exercise createExercise(Exercise exercise);
 
     //Read
     Optional<Exercise> getById(Long id);
@@ -18,7 +18,7 @@ public interface ExerciseService {
     Optional<Exercise> getExerciseByName(String name);
 
     //Update
-    void updateExercise(Long id, Exercise exercise);
+    Exercise updateExercise(Long id, Exercise exercise);
 
     //Delete
     void deleteExercise(Long id);

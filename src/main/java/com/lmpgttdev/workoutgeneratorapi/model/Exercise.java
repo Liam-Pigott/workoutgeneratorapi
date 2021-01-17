@@ -27,7 +27,7 @@ public class Exercise {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "exercise_type")
+    @Column(name = "type")
     @Enumerated(EnumType.STRING)
     private ExerciseType type;
 
@@ -35,4 +35,10 @@ public class Exercise {
     @Enumerated(EnumType.STRING)
     private MuscleGroup muscleGroup;
 
+    public Exercise(@NotBlank String name, String description, ExerciseType type, MuscleGroup muscleGroup) {
+        this.name = name;
+        this.description = description;
+        this.type = type;
+        this.muscleGroup = muscleGroup;
+    }
 }

@@ -35,4 +35,14 @@ public class ExerciseController {
     public void createExercise(@RequestBody Exercise exercise){
         exerciseService.createExercise(exercise);
     }
+
+    @PutMapping(path = "{id}",consumes = "application/json", produces = "application/json")
+    public void updateExercise(@PathVariable Long id, @RequestBody Exercise exercise){
+        exerciseService.updateExercise(id, exercise);
+    }
+
+    @DeleteMapping(path = "{id}")
+    public void deleteExerciseById(@PathVariable Long id){
+        exerciseService.deleteExercise(id);
+    }
 }
