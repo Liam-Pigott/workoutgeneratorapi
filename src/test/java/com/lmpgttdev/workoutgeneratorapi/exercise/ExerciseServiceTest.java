@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -123,5 +124,21 @@ public class ExerciseServiceTest {
         then(exerciseRepository).should(never()).save(any(Exercise.class));
     }
 
+    @Test
+    public void whenDeleteExerciseById_thenItShouldRemoveExercise(){
+        Long idToDelete = 1L;
+
+        //chained will return for multiple calls to findbyid
+        given(exerciseRepository.findById(idToDelete)).willReturn(Optional.ofNullable(exerciseList.get(0))).willReturn(Optional.empty());
+
+        //verify it exists
+        Optional<Exercise> toDelete = exerciseService.getExerciseById(idToDelete);
+        assertTrue(toDelete.isPresent());
+
+        exerciseService.deleteExercise(idToDelete);
+
+        Optional<Exercise> deletedExercise = exerciseService.getExerciseById(idToDelete);
+        assertTrue(deletedExercise.isEmpty());
+    }
 
 }

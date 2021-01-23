@@ -33,7 +33,7 @@ public class ExerciseController {
     @PostMapping(consumes = "application/json", produces = "application/json")
     public ResponseEntity<Exercise> createExercise(@RequestBody Exercise exercise) {
         return exerciseService.createExercise(exercise)
-                .map(ResponseEntity::ok).orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
+                .map(ResponseEntity::ok).orElse(ResponseEntity.status(HttpStatus.CONFLICT).build());
     }
 
     @PutMapping(path = "{id}", consumes = "application/json")
