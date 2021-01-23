@@ -30,32 +30,32 @@ public class ExerciseRepositoryTest {
     private ExerciseRepository exerciseRepository;
 
     @Test
-    public void whenFindById_thenReturnExercise(){
+    public void whenFindById_thenReturnExercise() {
         Optional<Exercise> exercise = exerciseRepository.findById(1L);
         assertTrue(exercise.isPresent());
     }
 
     @Test
-    public void whenFindById_thenReturnEmptyIfNotExists(){
+    public void whenFindById_thenReturnEmptyIfNotExists() {
         Optional<Exercise> exercise = exerciseRepository.findById(9999L);
         assertTrue(exercise.isEmpty());
     }
 
     @Test
-    public void whenFindByName_thenReturnExercise(){
+    public void whenFindByName_thenReturnExercise() {
         Optional<Exercise> exercise = exerciseRepository.findByNameIgnoreCase("tricep dip");
         assertTrue(exercise.isPresent());
     }
 
     @Test
-    public void whenFindByMuscleGroup_thenReturnExercises(){
+    public void whenFindByMuscleGroup_thenReturnExercises() {
         List<Exercise> exercises = exerciseRepository.findAllByMuscleGroup(MuscleGroup.CHEST);
         assertTrue(exercises.size() > 0);
         assertEquals(exercises.stream().filter(e -> e.getMuscleGroup().equals(MuscleGroup.CHEST)).count(), exercises.size());
     }
 
     @Test
-    public void whenInsertExercise_thenReturnExercise(){
+    public void whenInsertExercise_thenReturnExercise() {
         Exercise exercise = new Exercise("Test exercise", "This is a test exercise", ExerciseType.STRENGTH, MuscleGroup.ARMS);
         entityManager.persist(exercise);
         entityManager.flush();
@@ -66,11 +66,11 @@ public class ExerciseRepositoryTest {
     }
 
     @Test
-    public void whenUpdateExercise_thenExerciseNameShouldChange(){
+    public void whenUpdateExercise_thenExerciseNameShouldChange() {
         String oldName = "tricep dip";
         String newName = "Updated name";
         Exercise exercise = exerciseRepository.findByNameIgnoreCase(oldName).orElse(null);
-        if(exercise != null){
+        if (exercise != null) {
             exercise.setName(newName);
             entityManager.persist(exercise);
             entityManager.flush();
@@ -82,7 +82,7 @@ public class ExerciseRepositoryTest {
     }
 
     @Test
-    public void whenDeleteExercise_thenExerciseShouldNotBeReturned(){
+    public void whenDeleteExercise_thenExerciseShouldNotBeReturned() {
         Optional<Exercise> exerciseToDelete = exerciseRepository.findByNameIgnoreCase("Hammer curl");
         exerciseToDelete.ifPresent(exercise -> exerciseRepository.deleteById(exercise.getId()));
 

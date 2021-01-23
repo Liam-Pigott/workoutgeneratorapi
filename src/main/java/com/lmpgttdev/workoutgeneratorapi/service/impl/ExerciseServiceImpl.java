@@ -1,5 +1,7 @@
 package com.lmpgttdev.workoutgeneratorapi.service.impl;
 
+import com.lmpgttdev.workoutgeneratorapi.exception.DuplicateObjectException;
+import com.lmpgttdev.workoutgeneratorapi.exception.ResourceNotFoundException;
 import com.lmpgttdev.workoutgeneratorapi.model.Exercise;
 import com.lmpgttdev.workoutgeneratorapi.model.MuscleGroup;
 import com.lmpgttdev.workoutgeneratorapi.repository.ExerciseRepository;
@@ -13,25 +15,24 @@ import java.util.Optional;
 @Service
 public class ExerciseServiceImpl implements ExerciseService {
 
-
     @Autowired
     private ExerciseRepository exerciseRepository;
 
     @Override
-    public Exercise createExercise(Exercise exercise) {
+    public Optional<Exercise> createExercise(Exercise exercise) {
         String name = exercise.getName();
+        // ifPresentOrElse not suitable for throwing so this seems like the cleaner approach
         boolean exerciseExists = exerciseRepository.findByNameIgnoreCase(name).isPresent();
-        if(!exerciseExists){
+        if (!exerciseExists) {
             exerciseRepository.saveAndFlush(exercise);
-            return exercise;
-        }
-        else{
-            throw new IllegalStateException("Exercise with name: " + name + " already exists");
+            return Optional.of(exercise);
+        } else {
+            throw new DuplicateObjectException("Exercise with name: " + name + " already exists");
         }
     }
 
     @Override
-    public Optional<Exercise> getById(Long id) {
+    public Optional<Exercise> getExerciseById(Long id) {
         return exerciseRepository.findById(id);
     }
 
@@ -51,17 +52,17 @@ public class ExerciseServiceImpl implements ExerciseService {
     }
 
     @Override
-    public Exercise updateExercise(Long id, Exercise exercise) {
+    public void updateExercise(Long id, Exercise exercise) {
         boolean exerciseNameExists = exerciseRepository.findByNameIgnoreCase(exercise.getName()).isPresent();
-        if(exerciseNameExists){
-            throw new IllegalStateException("Could not update. Exercise with name: " + exercise.getName() + " already exists.");
+        if (exerciseNameExists) {
+            throw new DuplicateObjectException("Could not update. Exercise with name: " + exercise.getName() + " already exists.");
         }
         Optional<Exercise> existingExerciseOptional = exerciseRepository.findById(id);
-        if(existingExerciseOptional.isEmpty()){
-            throw new IllegalStateException("Could not find exercise with id: " + id);
+        if (existingExerciseOptional.isEmpty()) {
+            throw new ResourceNotFoundException("Could not find exercise with id: " + id);
         }
         exercise.setId(id);
-        return exerciseRepository.save(exercise);
+        exerciseRepository.save(exercise);
     }
 
     @Override

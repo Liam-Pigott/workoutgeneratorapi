@@ -9,16 +9,16 @@ import java.util.Optional;
 public interface ExerciseService {
 
     //Create
-    Exercise createExercise(Exercise exercise);
+    Optional<Exercise> createExercise(Exercise exercise);
 
     //Read
-    Optional<Exercise> getById(Long id);
+    Optional<Exercise> getExerciseById(Long id);
     List<Exercise> getAllExercises();
     List<Exercise> getAllExercisesByMuscleGroup(MuscleGroup muscleGroup);
     Optional<Exercise> getExerciseByName(String name);
 
     //Update
-    Exercise updateExercise(Long id, Exercise exercise);
+    void updateExercise(Long id, Exercise exercise);
 
     //Delete
     void deleteExercise(Long id);
