@@ -1,9 +1,6 @@
 package com.lmpgttdev.workoutgeneratorapi.model;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -12,6 +9,7 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode
 @Table(name = "Exercise")
 public class Exercise {
@@ -27,7 +25,7 @@ public class Exercise {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "exercise_type")
+    @Column(name = "type")
     @Enumerated(EnumType.STRING)
     private ExerciseType type;
 
@@ -35,4 +33,10 @@ public class Exercise {
     @Enumerated(EnumType.STRING)
     private MuscleGroup muscleGroup;
 
+    public Exercise(@NotBlank String name, String description, ExerciseType type, MuscleGroup muscleGroup) {
+        this.name = name;
+        this.description = description;
+        this.type = type;
+        this.muscleGroup = muscleGroup;
+    }
 }

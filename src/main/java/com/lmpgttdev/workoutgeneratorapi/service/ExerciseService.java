@@ -9,10 +9,10 @@ import java.util.Optional;
 public interface ExerciseService {
 
     //Create
-    void createExercise(Exercise exercise);
+    Optional<Exercise> createExercise(Exercise exercise);
 
     //Read
-    Optional<Exercise> getById(Long id);
+    Optional<Exercise> getExerciseById(Long id);
     List<Exercise> getAllExercises();
     List<Exercise> getAllExercisesByMuscleGroup(MuscleGroup muscleGroup);
     Optional<Exercise> getExerciseByName(String name);

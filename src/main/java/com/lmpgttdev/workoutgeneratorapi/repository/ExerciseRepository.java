@@ -12,5 +12,5 @@ import java.util.Optional;
 public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
 
     List<Exercise> findAllByMuscleGroup(MuscleGroup muscleGroup);
-    Optional<Exercise> findExerciseByName(String name);
+    Optional<Exercise> findByNameIgnoreCase(String name);
 }

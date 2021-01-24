@@ -27,14 +27,20 @@ public enum MuscleGroup {
     private final String label;
 
     MuscleGroup(String label) {
-        this.label=label;
+        this.label = label;
     }
 
     public String getLabel() {
         return this.label;
     }
 
-    public static Optional<MuscleGroup> getByLabel(String label){
+    /**
+     * Helper to get muscle group when only the label is known.
+     *
+     * @param label
+     * @return
+     */
+    public static Optional<MuscleGroup> getByLabel(String label) {
         return Arrays.stream(values())
                 .filter(group -> group.label.equals(label))
                 .findFirst();

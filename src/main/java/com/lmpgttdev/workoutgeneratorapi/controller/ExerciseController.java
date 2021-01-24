@@ -1,9 +1,11 @@
 package com.lmpgttdev.workoutgeneratorapi.controller;
 
 
+import com.lmpgttdev.workoutgeneratorapi.exception.ResourceNotFoundException;
 import com.lmpgttdev.workoutgeneratorapi.model.Exercise;
 import com.lmpgttdev.workoutgeneratorapi.service.impl.ExerciseServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,21 +20,31 @@ public class ExerciseController {
     private ExerciseServiceImpl exerciseService;
 
     @GetMapping
-    public List<Exercise> getAllExercise(){
+    public List<Exercise> getAllExercise() {
         return exerciseService.getAllExercises();
     }
 
     @GetMapping(path = "{id}")
-    public ResponseEntity<Exercise> getExerciseById(@PathVariable Long id){
-        Optional<Exercise> exercise = exerciseService.getById(id);
-        if(exercise.isEmpty()){
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok((exercise.get()));
+    public ResponseEntity<Exercise> getExerciseById(@PathVariable Long id) {
+        Optional<Exercise> exercise = exerciseService.getExerciseById(id);
+        return exercise.map(ResponseEntity::ok).orElseThrow(() -> new ResourceNotFoundException("Could not find exercise with id: " + id));
     }
 
     @PostMapping(consumes = "application/json", produces = "application/json")
-    public void createExercise(@RequestBody Exercise exercise){
-        exerciseService.createExercise(exercise);
+    public ResponseEntity<Exercise> createExercise(@RequestBody Exercise exercise) {
+        return exerciseService.createExercise(exercise)
+                .map(ResponseEntity::ok).orElse(ResponseEntity.status(HttpStatus.CONFLICT).build());
+    }
+
+    @PutMapping(path = "{id}", consumes = "application/json")
+    public ResponseEntity<Void> updateExercise(@PathVariable Long id, @RequestBody Exercise exercise) {
+        exerciseService.updateExercise(id, exercise);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping(path = "{id}")
+    public ResponseEntity<Void> deleteExerciseById(@PathVariable Long id) {
+        exerciseService.deleteExercise(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
