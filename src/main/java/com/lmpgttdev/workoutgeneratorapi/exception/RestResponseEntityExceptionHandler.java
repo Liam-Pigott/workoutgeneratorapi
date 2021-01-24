@@ -30,6 +30,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.NOT_FOUND);
         body.put("message", ex.getMessage());
+        body.put("method", ((ServletWebRequest) request).getRequest().getMethod());
         body.put("path", ((ServletWebRequest) request).getRequest().getRequestURI());
 
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
@@ -43,6 +44,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.CONFLICT);
         body.put("message", ex.getMessage());
+        body.put("method", ((ServletWebRequest) request).getRequest().getMethod());
         body.put("path", ((ServletWebRequest) request).getRequest().getRequestURI());
 
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
@@ -56,6 +58,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         body.put("timestamp", LocalDateTime.now());
         body.put("status", status);
         body.put("message", ex.getMessage());
+        body.put("method", ((ServletWebRequest) request).getRequest().getMethod());
         body.put("path", ((ServletWebRequest) request).getRequest().getRequestURI());
 
         return new ResponseEntity<>(body, status);

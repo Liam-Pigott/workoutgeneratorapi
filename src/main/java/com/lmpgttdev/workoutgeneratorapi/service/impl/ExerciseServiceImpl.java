@@ -67,6 +67,8 @@ public class ExerciseServiceImpl implements ExerciseService {
 
     @Override
     public void deleteExercise(Long id) {
+        //If trying to delete an object that doesn't exist, I still want to know about it
+        exerciseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Could not find exercise with id: " + id));
         exerciseRepository.deleteById(id);
     }
 }

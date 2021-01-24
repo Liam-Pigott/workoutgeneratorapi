@@ -37,12 +37,14 @@ public class ExerciseController {
     }
 
     @PutMapping(path = "{id}", consumes = "application/json")
-    public void updateExercise(@PathVariable Long id, @RequestBody Exercise exercise) {
+    public ResponseEntity<Void> updateExercise(@PathVariable Long id, @RequestBody Exercise exercise) {
         exerciseService.updateExercise(id, exercise);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping(path = "{id}")
-    public void deleteExerciseById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteExerciseById(@PathVariable Long id) {
         exerciseService.deleteExercise(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

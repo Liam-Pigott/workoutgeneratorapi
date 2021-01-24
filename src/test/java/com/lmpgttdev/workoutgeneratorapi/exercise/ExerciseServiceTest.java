@@ -131,12 +131,10 @@ public class ExerciseServiceTest {
         //chained will return for multiple calls to findbyid
         given(exerciseRepository.findById(idToDelete)).willReturn(Optional.ofNullable(exerciseList.get(0))).willReturn(Optional.empty());
 
-        //verify it exists
-        Optional<Exercise> toDelete = exerciseService.getExerciseById(idToDelete);
-        assertTrue(toDelete.isPresent());
-
+        //1st call to findbyid in this method
         exerciseService.deleteExercise(idToDelete);
 
+        //second call to verify
         Optional<Exercise> deletedExercise = exerciseService.getExerciseById(idToDelete);
         assertTrue(deletedExercise.isEmpty());
     }

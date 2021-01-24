@@ -26,6 +26,8 @@ import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -83,7 +85,8 @@ public class ExerciseControllerTest {
         given(exerciseService.getExerciseById(999L)).willReturn(Optional.empty());
 
         mockMvc.perform(get("/api/v1/exercises/999")).andDo(print())
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof ResourceNotFoundException));
     }
 
     @Test
@@ -113,9 +116,22 @@ public class ExerciseControllerTest {
         mockMvc.perform(post("/api/v1/exercises")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof DuplicateObjectException));
 
         verify(exerciseService, times(1)).createExercise(exercise);
+    }
+
+    @Test
+    public void whenCreateExercise_thenItShouldThrowWhenMalformedJson() throws Exception {
+        mockMvc.perform(post("/api/v1/exercises")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(malformedJson))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof HttpMessageNotReadableException));
+
+        then(exerciseService).should(never()).createExercise(any(Exercise.class));
     }
 
     @Test
@@ -130,7 +146,7 @@ public class ExerciseControllerTest {
         mockMvc.perform(put("/api/v1/exercises/" + toUpdate.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(exerciseService, times(1)).updateExercise(toUpdate.getId(), newExercise);
     }
@@ -150,7 +166,8 @@ public class ExerciseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(content().string(containsString("Could not find exercise with id: " + idNotExist)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof ResourceNotFoundException));;
     }
 
     @Test
@@ -169,6 +186,30 @@ public class ExerciseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(content().string(containsString("Exercise with name " + existingName + " already exists")))
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof DuplicateObjectException));
+    }
+
+    @Test
+    public void whenDeleteExerciseById_thenReturn204Response() throws Exception {
+        Exercise exercise = exerciseList.get(0);
+        Long existingId = exercise.getId();
+
+        mockMvc.perform(delete("/api/v1/exercises/" + existingId))
+                .andExpect(status().isNoContent());
+
+        verify(exerciseService, times(1)).deleteExercise(existingId);
+    }
+
+    @Test
+    public void whenDeleteExerciseById_thenReturn404WhenNotFound() throws Exception {
+        Long idNotExist = 1L;
+        doThrow(new ResourceNotFoundException("Could not find exercise with id: " + idNotExist)).when(exerciseService).deleteExercise(idNotExist);
+
+        mockMvc.perform(delete("/api/v1/exercises/" + idNotExist))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof ResourceNotFoundException));
+
+        verify(exerciseService, times(1)).deleteExercise(idNotExist);
     }
 }
