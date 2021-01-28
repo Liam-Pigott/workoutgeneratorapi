@@ -2,9 +2,11 @@ package com.lmpgttdev.workoutgeneratorapi.exercise;
 
 import com.lmpgttdev.workoutgeneratorapi.exception.DuplicateObjectException;
 import com.lmpgttdev.workoutgeneratorapi.exception.ResourceNotFoundException;
+import com.lmpgttdev.workoutgeneratorapi.model.Equipment;
 import com.lmpgttdev.workoutgeneratorapi.model.Exercise;
 import com.lmpgttdev.workoutgeneratorapi.model.ExerciseType;
 import com.lmpgttdev.workoutgeneratorapi.model.MuscleGroup;
+import com.lmpgttdev.workoutgeneratorapi.repository.EquipmentRepository;
 import com.lmpgttdev.workoutgeneratorapi.repository.ExerciseRepository;
 import com.lmpgttdev.workoutgeneratorapi.service.impl.ExerciseServiceImpl;
 import org.junit.Before;
@@ -16,7 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +36,9 @@ public class ExerciseServiceTest {
     @Mock
     private ExerciseRepository exerciseRepository;
 
+    @Mock
+    private EquipmentRepository equipmentRepository;
+
     @InjectMocks
     private ExerciseServiceImpl exerciseService;
 
@@ -46,8 +50,8 @@ public class ExerciseServiceTest {
     @Before
     public void setUp(){
         this.exerciseList = new ArrayList<>();
-        this.exerciseList.add(new Exercise(1L, "Dumbbell Chest Press", "Push weights away from chest", ExerciseType.STRENGTH, MuscleGroup.CHEST));
-        this.exerciseList.add(new Exercise(2L, "Bodyweight squat", "Squat without additional weight", ExerciseType.STRENGTH, MuscleGroup.QUADS));
+        this.exerciseList.add(new Exercise(1L, "Dumbbell Chest Press", "Push weights away from chest", ExerciseType.STRENGTH, MuscleGroup.CHEST, new Equipment("Dumbbell")));
+        this.exerciseList.add(new Exercise(2L, "Bodyweight squat", "Squat without additional weight", ExerciseType.STRENGTH, MuscleGroup.QUADS, null));
     }
 
     @Test
@@ -71,8 +75,10 @@ public class ExerciseServiceTest {
     @Test
     public void whenGivenNewExercise_thenItShouldSaveNewExercise() {
         Exercise exercise = exerciseList.get(0);
+        Equipment equipment = exercise.getEquipment();
 
         given(exerciseRepository.findByNameIgnoreCase(exercise.getName())).willReturn(Optional.empty());
+        given(equipmentRepository.findByNameIgnoreCase(equipment.getName())).willReturn(Optional.of(equipment));
 
         Optional<Exercise> savedExercise = exerciseService.createExercise(exercise);
 
@@ -82,7 +88,7 @@ public class ExerciseServiceTest {
 
     @Test
     public void whenGivenNewExercise_thenItShouldThrowWhenNameAlreadyExists() {
-        Exercise duplicateExercise = new Exercise("Duplicate exercise", "This will be a duplicate exercises", ExerciseType.STRENGTH, MuscleGroup.ABS);
+        Exercise duplicateExercise = new Exercise("Duplicate exercise", "This will be a duplicate exercises", ExerciseType.STRENGTH, MuscleGroup.ABS, null);
 
         given(exerciseRepository.findByNameIgnoreCase(duplicateExercise.getName())).willReturn(Optional.of(duplicateExercise));
 
@@ -95,8 +101,8 @@ public class ExerciseServiceTest {
 
     @Test
     public void whenGivenExistingExerciseId_thenItShouldUpdateExercise() {
-        Exercise existingExercise = new Exercise("An existing exercise", "This is an existing exercise", ExerciseType.CARDIO, MuscleGroup.CORE);
-        Exercise newExercise = new Exercise("An updated exercise", "This is an updated exercise", ExerciseType.CARDIO, MuscleGroup.CORE);
+        Exercise existingExercise = new Exercise("An existing exercise", "This is an existing exercise", ExerciseType.CARDIO, MuscleGroup.CORE, null);
+        Exercise newExercise = new Exercise("An updated exercise", "This is an updated exercise", ExerciseType.CARDIO, MuscleGroup.CORE, null);
         given(exerciseRepository.findById(2L)).willReturn(Optional.of(existingExercise));
 
         when(exerciseRepository.save(any(Exercise.class))).thenAnswer(i -> {

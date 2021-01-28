@@ -20,7 +20,7 @@ public class ExerciseController {
     private ExerciseServiceImpl exerciseService;
 
     @GetMapping
-    public List<Exercise> getAllExercise() {
+    public List<Exercise> getAllExercises() {
         return exerciseService.getAllExercises();
     }
 
