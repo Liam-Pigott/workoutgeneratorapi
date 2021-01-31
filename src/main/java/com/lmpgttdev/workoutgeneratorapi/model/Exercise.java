@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 
 @Entity
 @Getter
@@ -12,14 +13,14 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Table(name = "Exercise")
-public class Exercise {
+public class Exercise implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
-    @Column(name = "name")
+    @Column(name = "name", unique=true)
     private String name;
 
     @Column(name = "description")
@@ -33,10 +34,15 @@ public class Exercise {
     @Enumerated(EnumType.STRING)
     private MuscleGroup muscleGroup;
 
-    public Exercise(@NotBlank String name, String description, ExerciseType type, MuscleGroup muscleGroup) {
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="equipment_id", referencedColumnName = "id")
+    Equipment equipment;
+
+    public Exercise(@NotBlank String name, String description, ExerciseType type, MuscleGroup muscleGroup, Equipment equipment) {
         this.name = name;
         this.description = description;
         this.type = type;
         this.muscleGroup = muscleGroup;
+        this.equipment = equipment;
     }
 }

@@ -50,6 +50,20 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(InvalidParameterException.class)
+    public ResponseEntity<Object> InvalidParameterException(
+            InvalidParameterException ex, WebRequest request) {
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST);
+        body.put("message", ex.getMessage());
+        body.put("method", ((ServletWebRequest) request).getRequest().getMethod());
+        body.put("path", ((ServletWebRequest) request).getRequest().getRequestURI());
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
 
     //custom handler useful for malformed JSON in post/put
     @Override

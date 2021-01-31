@@ -45,4 +45,10 @@ public enum MuscleGroup {
                 .filter(group -> group.label.equals(label))
                 .findFirst();
     }
+
+    public static Optional<MuscleGroup> getByNameIgnoreCase(String name){
+        return Arrays.stream(values())
+                .filter(group -> group.name().equalsIgnoreCase(name))
+                .findFirst();
+    }
 }

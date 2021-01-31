@@ -1,6 +1,3 @@
-DELETE FROM Exercise;
-DELETE FROM Equipment;
-
 
 /*
     Equipment

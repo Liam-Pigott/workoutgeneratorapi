@@ -14,7 +14,7 @@ public interface ExerciseService {
     //Read
     Optional<Exercise> getExerciseById(Long id);
     List<Exercise> getAllExercises();
-    List<Exercise> getAllExercisesByMuscleGroup(MuscleGroup muscleGroup);
+    List<Exercise> getAllExercisesByMuscleGroup(String muscleGroup);
     Optional<Exercise> getExerciseByName(String name);
 
     //Update

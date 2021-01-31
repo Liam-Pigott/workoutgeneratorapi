@@ -56,7 +56,7 @@ public class ExerciseRepositoryTest {
 
     @Test
     public void whenInsertExercise_thenReturnExercise() {
-        Exercise exercise = new Exercise("Test exercise", "This is a test exercise", ExerciseType.STRENGTH, MuscleGroup.ARMS);
+        Exercise exercise = new Exercise("Test exercise", "This is a test exercise", ExerciseType.STRENGTH, MuscleGroup.ARMS, null);
         entityManager.persist(exercise);
         entityManager.flush();
 
