@@ -47,6 +47,7 @@ public class ExerciseControllerTest {
     @MockBean
     private ExerciseServiceImpl exerciseService;
 
+    private final String exercisesEndpoint = "/api/v1/exercises";
 
     private List<Exercise> exerciseList;
 
@@ -70,7 +71,7 @@ public class ExerciseControllerTest {
     public void whenGetAllExercises_thenItShouldReturnListOfExercises() throws Exception {
         given(exerciseService.getAllExercises()).willReturn(exerciseList);
 
-        mockMvc.perform(get("/api/v1/exercises"))
+        mockMvc.perform(get(exercisesEndpoint))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.*", hasSize(exerciseList.size())));
     }
@@ -81,7 +82,7 @@ public class ExerciseControllerTest {
         List<Exercise> chestExercises = exerciseList.stream().filter(e -> e.getMuscleGroup().equals(MuscleGroup.CHEST)).collect(Collectors.toList());
         given(exerciseService.getAllExercisesByMuscleGroup(param)).willReturn(chestExercises);
 
-        mockMvc.perform(get("/api/v1/exercises")
+        mockMvc.perform(get(exercisesEndpoint)
                 .param("muscleGroup", param))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -94,7 +95,7 @@ public class ExerciseControllerTest {
         String param = "ches";
         given(exerciseService.getAllExercisesByMuscleGroup(param)).willThrow(InvalidParameterException.class);
 
-        mockMvc.perform(get("/api/v1/exercises")
+        mockMvc.perform(get(exercisesEndpoint)
                 .param("muscleGroup", param))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -106,7 +107,7 @@ public class ExerciseControllerTest {
         Exercise exercise = exerciseList.get(0);
         given(exerciseService.getExerciseById(1L)).willReturn(Optional.of(exercise));
 
-        mockMvc.perform(get("/api/v1/exercises/1")).andDo(print())
+        mockMvc.perform(get(exercisesEndpoint + "/1")).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(exercise.getId()))
                 .andExpect(jsonPath("$.name").value(exercise.getName()));
@@ -116,7 +117,7 @@ public class ExerciseControllerTest {
     public void whenFindExerciseByIdNotExists_thenItShouldReturnNotFound() throws Exception {
         given(exerciseService.getExerciseById(999L)).willReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/v1/exercises/999")).andDo(print())
+        mockMvc.perform(get(exercisesEndpoint + "/999")).andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof ResourceNotFoundException));
     }
@@ -128,7 +129,7 @@ public class ExerciseControllerTest {
 
         given(exerciseService.createExercise(Mockito.any(Exercise.class))).willReturn(Optional.of(exercise));
 
-        mockMvc.perform(post("/api/v1/exercises")
+        mockMvc.perform(post(exercisesEndpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(status().isOk());
@@ -143,7 +144,7 @@ public class ExerciseControllerTest {
 
         doThrow(DuplicateObjectException.class).when(exerciseService).createExercise(Mockito.any(Exercise.class));
 
-        mockMvc.perform(post("/api/v1/exercises")
+        mockMvc.perform(post(exercisesEndpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(status().isConflict())
@@ -154,7 +155,7 @@ public class ExerciseControllerTest {
 
     @Test
     public void whenCreateExercise_thenItShouldThrowWhenMalformedJson() throws Exception {
-        mockMvc.perform(post("/api/v1/exercises")
+        mockMvc.perform(post(exercisesEndpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(malformedJson))
                 .andDo(print())
@@ -172,7 +173,7 @@ public class ExerciseControllerTest {
 
         String json = mapper.writeValueAsString(newExercise);
 
-        mockMvc.perform(put("/api/v1/exercises/" + toUpdate.getId())
+        mockMvc.perform(put(exercisesEndpoint + "/" + toUpdate.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(status().isNoContent());
@@ -190,7 +191,7 @@ public class ExerciseControllerTest {
 
         doThrow(new ResourceNotFoundException("Could not find exercise with id: " + idNotExist)).when(exerciseService).updateExercise(idNotExist, newExercise);
 
-        mockMvc.perform(put("/api/v1/exercises/" + idNotExist)
+        mockMvc.perform(put(exercisesEndpoint + "/" + idNotExist)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(content().string(containsString("Could not find exercise with id: " + idNotExist)))
@@ -209,7 +210,7 @@ public class ExerciseControllerTest {
 
         doThrow(new DuplicateObjectException("Exercise with name " + existingName + " already exists")).when(exerciseService).updateExercise(existingId, newExercise);
 
-        mockMvc.perform(put("/api/v1/exercises/" + existingId)
+        mockMvc.perform(put(exercisesEndpoint + "/" + existingId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(content().string(containsString("Exercise with name " + existingName + " already exists")))
@@ -222,7 +223,7 @@ public class ExerciseControllerTest {
         Exercise exercise = exerciseList.get(0);
         Long existingId = exercise.getId();
 
-        mockMvc.perform(delete("/api/v1/exercises/" + existingId))
+        mockMvc.perform(delete(exercisesEndpoint + "/" + existingId))
                 .andExpect(status().isNoContent());
 
         verify(exerciseService, times(1)).deleteExercise(existingId);
@@ -233,7 +234,7 @@ public class ExerciseControllerTest {
         Long idNotExist = 1L;
         doThrow(new ResourceNotFoundException("Could not find exercise with id: " + idNotExist)).when(exerciseService).deleteExercise(idNotExist);
 
-        mockMvc.perform(delete("/api/v1/exercises/" + idNotExist))
+        mockMvc.perform(delete(exercisesEndpoint + "/" + idNotExist))
                 .andExpect(status().isNotFound())
                 .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof ResourceNotFoundException));
 
