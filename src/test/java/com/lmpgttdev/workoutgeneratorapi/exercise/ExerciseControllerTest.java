@@ -3,6 +3,7 @@ package com.lmpgttdev.workoutgeneratorapi.exercise;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lmpgttdev.workoutgeneratorapi.controller.ExerciseController;
 import com.lmpgttdev.workoutgeneratorapi.exception.DuplicateObjectException;
+import com.lmpgttdev.workoutgeneratorapi.exception.InvalidParameterException;
 import com.lmpgttdev.workoutgeneratorapi.exception.ResourceNotFoundException;
 import com.lmpgttdev.workoutgeneratorapi.model.Equipment;
 import com.lmpgttdev.workoutgeneratorapi.model.Exercise;
@@ -12,6 +13,7 @@ import com.lmpgttdev.workoutgeneratorapi.service.impl.ExerciseServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -21,9 +23,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
@@ -53,6 +55,7 @@ public class ExerciseControllerTest {
         this.exerciseList = new ArrayList<>();
         this.exerciseList.add(new Exercise(1L, "Dumbbell Chest Press", "Push weights away from chest", ExerciseType.STRENGTH, MuscleGroup.CHEST, new Equipment("Dumbbell")));
         this.exerciseList.add(new Exercise(2L, "Bodyweight squat", "Squat without additional weight", ExerciseType.STRENGTH, MuscleGroup.QUADS, null));
+        this.exerciseList.add(new Exercise(3L, "Barbell Chest Press", "Push weights away from chest", ExerciseType.STRENGTH, MuscleGroup.CHEST, new Equipment("Barbell")));
     }
 
     private final String malformedJson = "{\n" +
@@ -69,7 +72,33 @@ public class ExerciseControllerTest {
 
         mockMvc.perform(get("/api/v1/exercises"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(2)));
+                .andExpect(jsonPath("$.*", hasSize(exerciseList.size())));
+    }
+
+    @Test
+    public void whenFindExercisesByMuscleGroup_thenReturnListOfExercises() throws Exception {
+        String param = "chest";
+        List<Exercise> chestExercises = exerciseList.stream().filter(e -> e.getMuscleGroup().equals(MuscleGroup.CHEST)).collect(Collectors.toList());
+        given(exerciseService.getAllExercisesByMuscleGroup(param)).willReturn(chestExercises);
+
+        mockMvc.perform(get("/api/v1/exercises")
+                .param("muscleGroup", param))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.*", hasSize(2)))
+                .andExpect(jsonPath("$.*.muscleGroup", allOf(hasItem("CHEST"))));
+    }
+
+    @Test
+    public void whenFindExercisesByMuscleGroup_thenThrowMuscleGroupNotValid() throws Exception {
+        String param = "ches";
+        given(exerciseService.getAllExercisesByMuscleGroup(param)).willThrow(InvalidParameterException.class);
+
+        mockMvc.perform(get("/api/v1/exercises")
+                .param("muscleGroup", param))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof InvalidParameterException));
     }
 
     @Test
@@ -97,14 +126,14 @@ public class ExerciseControllerTest {
         Exercise exercise = exerciseList.get(0);
         String json = mapper.writeValueAsString(exercise);
 
-        given(exerciseService.createExercise(any(Exercise.class))).willReturn(Optional.of(exercise));
+        given(exerciseService.createExercise(Mockito.any(Exercise.class))).willReturn(Optional.of(exercise));
 
         mockMvc.perform(post("/api/v1/exercises")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(status().isOk());
 
-        verify(exerciseService, times(1)).createExercise(any(Exercise.class));
+        verify(exerciseService, times(1)).createExercise(Mockito.any(Exercise.class));
     }
 
     @Test
@@ -112,7 +141,7 @@ public class ExerciseControllerTest {
         Exercise exercise = exerciseList.get(0);
         String json = mapper.writeValueAsString(exercise);
 
-        doThrow(DuplicateObjectException.class).when(exerciseService).createExercise(any(Exercise.class));
+        doThrow(DuplicateObjectException.class).when(exerciseService).createExercise(Mockito.any(Exercise.class));
 
         mockMvc.perform(post("/api/v1/exercises")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -120,7 +149,7 @@ public class ExerciseControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof DuplicateObjectException));
 
-        verify(exerciseService, times(1)).createExercise(any(Exercise.class));
+        verify(exerciseService, times(1)).createExercise(Mockito.any(Exercise.class));
     }
 
     @Test
@@ -132,7 +161,7 @@ public class ExerciseControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof HttpMessageNotReadableException));
 
-        then(exerciseService).should(never()).createExercise(any(Exercise.class));
+        then(exerciseService).should(never()).createExercise(Mockito.any(Exercise.class));
     }
 
     @Test

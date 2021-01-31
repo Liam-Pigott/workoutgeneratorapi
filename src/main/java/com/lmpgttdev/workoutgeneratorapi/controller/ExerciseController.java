@@ -3,6 +3,7 @@ package com.lmpgttdev.workoutgeneratorapi.controller;
 
 import com.lmpgttdev.workoutgeneratorapi.exception.ResourceNotFoundException;
 import com.lmpgttdev.workoutgeneratorapi.model.Exercise;
+import com.lmpgttdev.workoutgeneratorapi.model.MuscleGroup;
 import com.lmpgttdev.workoutgeneratorapi.service.impl.ExerciseServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,10 @@ public class ExerciseController {
     private ExerciseServiceImpl exerciseService;
 
     @GetMapping
-    public List<Exercise> getAllExercises() {
+    public List<Exercise> getAllExercises(@RequestParam(required = false) String muscleGroup) {
+        if(muscleGroup != null){
+            return exerciseService.getAllExercisesByMuscleGroup(muscleGroup);
+        }
         return exerciseService.getAllExercises();
     }
 

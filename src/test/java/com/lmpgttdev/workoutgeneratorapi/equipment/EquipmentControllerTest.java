@@ -47,7 +47,7 @@ public class EquipmentControllerTest {
     }
 
     @Test
-    public void whenGetAllExercises_thenItShouldReturnListOfExercises() throws Exception {
+    public void whenGetAllEquipment_thenItShouldReturnListOfEquipment() throws Exception {
         given(equipmentService.getAllEquipment()).willReturn(equipmentList);
 
         mockMvc.perform(get("/api/v1/equipment"))
@@ -56,7 +56,7 @@ public class EquipmentControllerTest {
     }
 
     @Test
-    public void whenFindExerciseById_thenItShouldReturnExercise() throws Exception {
+    public void whenFindEquipmentById_thenItShouldReturnEquipment() throws Exception {
         Equipment equipment = equipmentList.get(0);
         given(equipmentService.getEquipmentById(1L)).willReturn(Optional.of(equipment));
 
@@ -67,7 +67,7 @@ public class EquipmentControllerTest {
     }
 
     @Test
-    public void whenFindExerciseByIdNotExists_thenItShouldReturnNotFound() throws Exception {
+    public void whenFindEquipmentByIdNotExists_thenItShouldReturnNotFound() throws Exception {
         given(equipmentService.getEquipmentById(999L)).willReturn(Optional.empty());
 
         mockMvc.perform(get("/api/v1/equipment/999")).andDo(print())

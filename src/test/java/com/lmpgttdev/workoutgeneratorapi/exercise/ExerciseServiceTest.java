@@ -1,6 +1,7 @@
 package com.lmpgttdev.workoutgeneratorapi.exercise;
 
 import com.lmpgttdev.workoutgeneratorapi.exception.DuplicateObjectException;
+import com.lmpgttdev.workoutgeneratorapi.exception.InvalidParameterException;
 import com.lmpgttdev.workoutgeneratorapi.exception.ResourceNotFoundException;
 import com.lmpgttdev.workoutgeneratorapi.model.Equipment;
 import com.lmpgttdev.workoutgeneratorapi.model.Exercise;
@@ -21,6 +22,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,6 +54,8 @@ public class ExerciseServiceTest {
         this.exerciseList = new ArrayList<>();
         this.exerciseList.add(new Exercise(1L, "Dumbbell Chest Press", "Push weights away from chest", ExerciseType.STRENGTH, MuscleGroup.CHEST, new Equipment("Dumbbell")));
         this.exerciseList.add(new Exercise(2L, "Bodyweight squat", "Squat without additional weight", ExerciseType.STRENGTH, MuscleGroup.QUADS, null));
+        this.exerciseList.add(new Exercise(3L, "Barbell Chest Press", "Push weights away from chest", ExerciseType.STRENGTH, MuscleGroup.CHEST, new Equipment("Barbell")));
+
     }
 
     @Test
@@ -69,7 +73,23 @@ public class ExerciseServiceTest {
     public void whenGetAllExercises_thenItShouldReturnListOfExercise(){
         given(exerciseRepository.findAll()).willReturn(exerciseList);
 
-        assertEquals(exerciseService.getAllExercises().size(), 2);
+        assertEquals(exerciseService.getAllExercises().size(), exerciseList.size());
+    }
+
+    @Test
+    public void whenGetExercisesByMuscleGroup_thenItShouldReturnListOfExercise(){
+        List<Exercise> chestExercises = exerciseList.stream().filter(e -> e.getMuscleGroup().equals(MuscleGroup.CHEST)).collect(Collectors.toList());
+        given(exerciseRepository.findAllByMuscleGroup(MuscleGroup.CHEST)).willReturn(chestExercises);
+
+        assertEquals(exerciseService.getAllExercisesByMuscleGroup("chest").size(), 2);
+    }
+
+    @Test
+    public void whenGetExercisesByMuscleGroup_thenItShouldThrowWhenMuscleGroupNotExists(){
+        String muscleGroup = "unknown group";
+        assertThatThrownBy(() -> exerciseService.getAllExercisesByMuscleGroup(muscleGroup))
+                .isInstanceOf(InvalidParameterException.class)
+                .hasMessageContaining("Could not find corresponding muscle group value for: " + muscleGroup);
     }
 
     @Test

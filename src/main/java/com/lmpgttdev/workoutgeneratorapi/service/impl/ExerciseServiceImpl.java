@@ -1,6 +1,7 @@
 package com.lmpgttdev.workoutgeneratorapi.service.impl;
 
 import com.lmpgttdev.workoutgeneratorapi.exception.DuplicateObjectException;
+import com.lmpgttdev.workoutgeneratorapi.exception.InvalidParameterException;
 import com.lmpgttdev.workoutgeneratorapi.exception.ResourceNotFoundException;
 import com.lmpgttdev.workoutgeneratorapi.model.Exercise;
 import com.lmpgttdev.workoutgeneratorapi.model.MuscleGroup;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,8 +52,10 @@ public class ExerciseServiceImpl implements ExerciseService {
     }
 
     @Override
-    public List<Exercise> getAllExercisesByMuscleGroup(MuscleGroup muscleGroup) {
-        return exerciseRepository.findAllByMuscleGroup(muscleGroup);
+    public List<Exercise> getAllExercisesByMuscleGroup(String muscleGroup) {
+        Optional<MuscleGroup> muscleGroupOpt = MuscleGroup.getByNameIgnoreCase(muscleGroup);
+        return muscleGroupOpt.map(m -> exerciseRepository.findAllByMuscleGroup(m))
+                .orElseThrow(() -> new InvalidParameterException("Could not find corresponding muscle group value for: " + muscleGroup + ". Accepted values are: " + Arrays.toString(MuscleGroup.values())));
     }
 
     @Override
