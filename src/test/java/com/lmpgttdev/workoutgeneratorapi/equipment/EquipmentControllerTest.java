@@ -35,6 +35,8 @@ public class EquipmentControllerTest {
     @MockBean
     private EquipmentServiceImpl equipmentService;
 
+    private final String equipmentEndpoint = "/api/v1/equipment";
+
     private List<Equipment> equipmentList;
 
     @Before
@@ -50,7 +52,7 @@ public class EquipmentControllerTest {
     public void whenGetAllEquipment_thenItShouldReturnListOfEquipment() throws Exception {
         given(equipmentService.getAllEquipment()).willReturn(equipmentList);
 
-        mockMvc.perform(get("/api/v1/equipment"))
+        mockMvc.perform(get(equipmentEndpoint))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.*", hasSize(4)));
     }
@@ -60,7 +62,7 @@ public class EquipmentControllerTest {
         Equipment equipment = equipmentList.get(0);
         given(equipmentService.getEquipmentById(1L)).willReturn(Optional.of(equipment));
 
-        mockMvc.perform(get("/api/v1/equipment/1"))
+        mockMvc.perform(get(equipmentEndpoint + "/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(equipment.getId()))
                 .andExpect(jsonPath("$.name").value(equipment.getName()));
@@ -70,7 +72,7 @@ public class EquipmentControllerTest {
     public void whenFindEquipmentByIdNotExists_thenItShouldReturnNotFound() throws Exception {
         given(equipmentService.getEquipmentById(999L)).willReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/v1/equipment/999")).andDo(print())
+        mockMvc.perform(get(equipmentEndpoint + "/999")).andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof ResourceNotFoundException));
     }

@@ -1,7 +1,9 @@
 package com.lmpgttdev.workoutgeneratorapi.model;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public enum MuscleGroup {
     CHEST("Chest"),
@@ -50,5 +52,10 @@ public enum MuscleGroup {
         return Arrays.stream(values())
                 .filter(group -> group.name().equalsIgnoreCase(name))
                 .findFirst();
+    }
+
+    public static Map<String, String> getNamesAndLabels(){
+        return Arrays.stream(MuscleGroup.values())
+                .collect(Collectors.toMap(MuscleGroup::name, MuscleGroup::getLabel));
     }
 }
